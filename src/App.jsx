@@ -9,7 +9,15 @@ import Companies from './pages/dashboard/Companies'
 import LeadImport from './pages/dashboard/LeadImport'
 import Leads from './pages/dashboard/Leads'
 import Customers from './pages/dashboard/Customers'
-
+import ManagerDashboard from './pages/manager/ManagerDashboard'
+import ManagerLeads from './pages/manager/ManagerLeads'
+import ManagerTeam from './pages/manager/ManagerTeam'
+import TeamLeadDashboard from './pages/teamlead/TeamLeadDashboard'
+import AgentDashboard from './pages/agent/AgentDashboard'
+import TeamLeadLeads from './pages/teamlead/TeamLeadLeads'
+import TeamLeadAgents from './pages/teamlead/TeamLeadAgents'
+import AgentLeads from './pages/agent/AgentLeads'
+import AgentCustomers from './pages/agent/AgentCustomers'
 function App() {
   return (
     <BrowserRouter>
@@ -58,6 +66,29 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/teamlead/leads" element={
+  <ProtectedRoute roles={['TEAM_LEAD']}>
+    <TeamLeadLeads />
+  </ProtectedRoute>
+} />
+
+<Route path="/teamlead/agents" element={
+  <ProtectedRoute roles={['TEAM_LEAD']}>
+    <TeamLeadAgents />
+  </ProtectedRoute>
+} />
+
+<Route path="/agent/leads" element={
+  <ProtectedRoute roles={['AGENT']}>
+    <AgentLeads />
+  </ProtectedRoute>
+} />
+
+<Route path="/agent/customers" element={
+  <ProtectedRoute roles={['AGENT']}>
+    <AgentCustomers />
+  </ProtectedRoute>
+} />
 <Route
   path="/dashboard/customers"
   element={
@@ -66,32 +97,47 @@ function App() {
     </ProtectedRoute>
   }
 />
-        <Route
-          path="/manager"
-          element={
-            <ProtectedRoute roles={['MANAGER']}>
-              <div className="p-8 text-2xl font-semibold">Manager Dashboard — Coming Soon</div>
-            </ProtectedRoute>
-          }
-        />
+    <Route
+  path="/manager"
+  element={
+    <ProtectedRoute roles={['MANAGER']}>
+      <ManagerDashboard />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/manager/leads"
+  element={
+    <ProtectedRoute roles={['MANAGER']}>
+      <ManagerLeads />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/manager/team"
+  element={
+    <ProtectedRoute roles={['MANAGER']}>
+      <ManagerTeam />
+    </ProtectedRoute>
+  }
+/>
+      <Route
+  path="/teamlead"
+  element={
+    <ProtectedRoute roles={['TEAM_LEAD']}>
+      <TeamLeadDashboard />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
-          path="/teamlead"
-          element={
-            <ProtectedRoute roles={['TEAM_LEAD']}>
-              <div className="p-8 text-2xl font-semibold">Team Lead Dashboard — Coming Soon</div>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/agent"
-          element={
-            <ProtectedRoute roles={['AGENT']}>
-              <div className="p-8 text-2xl font-semibold">Agent Dashboard — Coming Soon</div>
-            </ProtectedRoute>
-          }
-        />
+  path="/agent"
+  element={
+    <ProtectedRoute roles={['AGENT']}>
+      <AgentDashboard />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/hr"

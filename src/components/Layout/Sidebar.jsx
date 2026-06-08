@@ -36,7 +36,6 @@ const navItems = {
     { label: 'Dashboard', icon: '📊', path: '/teamlead' },
     { label: 'My Leads', icon: '📋', path: '/teamlead/leads' },
     { label: 'My Agents', icon: '👥', path: '/teamlead/agents' },
-    { label: 'Assign Leads', icon: '📤', path: '/teamlead/assign' },
   ],
   AGENT: [
     { label: 'Dashboard', icon: '📊', path: '/agent' },
