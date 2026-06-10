@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import API from '../../api/axios'
+import AttendanceWidget from '../../components/AttendanceWidget'
+
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -37,6 +39,7 @@ export default function AdminDashboard() {
       <div className="mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">Welcome back! Here's what's happening.</p>
+        <AttendanceWidget />
       </div>
 
       {/* Stats */}

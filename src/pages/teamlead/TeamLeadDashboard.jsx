@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import API from '../../api/axios'
 import useAuthStore from '../../store/authStore'
-
+import AttendanceWidget from '../../components/AttendanceWidget'
 export default function TeamLeadDashboard() {
   const { user } = useAuthStore()
   const [stats, setStats] = useState({
@@ -59,6 +59,7 @@ export default function TeamLeadDashboard() {
         <p className="text-gray-500 text-sm mt-1">
           Welcome back, {user?.name}! Here is your team overview.
         </p>
+        <AttendanceWidget />
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">

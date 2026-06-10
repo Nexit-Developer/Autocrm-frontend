@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import API from '../../api/axios'
 import useAuthStore from '../../store/authStore'
+import AttendanceWidget from '../../components/AttendanceWidget'
 
 export default function ManagerDashboard() {
   const { user } = useAuthStore()
@@ -59,6 +60,7 @@ export default function ManagerDashboard() {
         <p className="text-gray-500 text-sm mt-1">
           Welcome back, {user?.name}! Here is your team overview.
         </p>
+        <AttendanceWidget />
       </div>
 
       {/* Stats */}

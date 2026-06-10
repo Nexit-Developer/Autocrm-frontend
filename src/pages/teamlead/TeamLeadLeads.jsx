@@ -19,8 +19,10 @@ export default function TeamLeadLeads() {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [assignModal, setAssignModal] = useState(null)
+  const [bulkAssignModal, setBulkAssignModal] = useState(false)
+  const [selectedLeads, setSelectedLeads] = useState([])
   const [selectedAgent, setSelectedAgent] = useState('')
-  const [actionLoading, setActionLoading] = useState(null)
+  const [actionLoading, setActionLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const leadsPerPage = 15
 
@@ -53,7 +55,7 @@ export default function TeamLeadLeads() {
 
   const handleAssign = async () => {
     if (!selectedAgent) return alert('Please select an agent')
-    setActionLoading(assignModal.id)
+    setActionLoading(true)
     try {
       await API.put(`/teamlead/leads/${assignModal.id}/assign`, {
         assignedToId: parseInt(selectedAgent)
@@ -64,7 +66,41 @@ export default function TeamLeadLeads() {
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to assign lead')
     } finally {
-      setActionLoading(null)
+      setActionLoading(false)
+    }
+  }
+
+  const handleBulkAssign = async () => {
+    if (!selectedAgent) return alert('Please select an agent')
+    if (selectedLeads.length === 0) return alert('Please select at least one lead')
+    setActionLoading(true)
+    try {
+      await API.post('/teamlead/leads/bulk-assign', {
+        leadIds: selectedLeads,
+        assignedToId: parseInt(selectedAgent)
+      })
+      setBulkAssignModal(false)
+      setSelectedLeads([])
+      setSelectedAgent('')
+      await refreshLeads()
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to bulk assign')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const toggleSelectLead = (leadId) => {
+    setSelectedLeads((prev) =>
+      prev.includes(leadId) ? prev.filter((id) => id !== leadId) : [...prev, leadId]
+    )
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedLeads.length === paginated.length) {
+      setSelectedLeads([])
+    } else {
+      setSelectedLeads(paginated.map((l) => l.id))
     }
   }
 
@@ -83,9 +119,19 @@ export default function TeamLeadLeads() {
 
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">My leads</h1>
-        <p className="text-gray-500 text-sm mt-1">{leads.length} total leads</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">My leads</h1>
+          <p className="text-gray-500 text-sm mt-1">{leads.length} leads assigned to you</p>
+        </div>
+        {selectedLeads.length > 0 && (
+          <button
+            onClick={() => setBulkAssignModal(true)}
+            className="bg-amber-500 text-white text-sm px-4 py-2.5 rounded-lg hover:bg-amber-600 transition-colors font-medium"
+          >
+            Assign {selectedLeads.length} selected to agent
+          </button>
+        )}
       </div>
 
       <div className="flex gap-3 mb-4 flex-wrap">
@@ -114,12 +160,20 @@ export default function TeamLeadLeads() {
         ) : paginated.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-4xl mb-3">📋</div>
-            <div className="font-medium">No leads found</div>
+            <div className="font-medium">No leads assigned to you yet</div>
           </div>
         ) : (
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
+                <th className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedLeads.length === paginated.length && paginated.length > 0}
+                    onChange={toggleSelectAll}
+                    className="rounded"
+                  />
+                </th>
                 <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">Name</th>
                 <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">Phone</th>
                 <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">City</th>
@@ -131,7 +185,18 @@ export default function TeamLeadLeads() {
             </thead>
             <tbody>
               {paginated.map((lead) => (
-                <tr key={lead.id} className="border-b border-gray-100 last:border-0">
+                <tr
+                  key={lead.id}
+                  className={`border-b border-gray-100 last:border-0 ${selectedLeads.includes(lead.id) ? 'bg-amber-50' : ''}`}
+                >
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedLeads.includes(lead.id)}
+                      onChange={() => toggleSelectLead(lead.id)}
+                      className="rounded"
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <div className="text-sm font-medium text-gray-900">{lead.name}</div>
                     <div className="text-xs text-gray-400">{lead.email || '—'}</div>
@@ -208,9 +273,7 @@ export default function TeamLeadLeads() {
               Assigning <span className="font-medium text-gray-700">{assignModal.name}</span>
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select agent
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Select agent</label>
               <select
                 value={selectedAgent}
                 onChange={(e) => setSelectedAgent(e.target.value)}
@@ -231,10 +294,49 @@ export default function TeamLeadLeads() {
               </button>
               <button
                 onClick={handleAssign}
-                disabled={actionLoading === assignModal.id}
+                disabled={actionLoading}
                 className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
               >
-                {actionLoading === assignModal.id ? 'Assigning...' : 'Assign'}
+                {actionLoading ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkAssignModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Bulk assign to agent</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Assigning <span className="font-medium text-gray-700">{selectedLeads.length} leads</span>
+            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Select agent</label>
+              <select
+                value={selectedAgent}
+                onChange={(e) => setSelectedAgent(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">Select agent...</option>
+                {agents.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => { setBulkAssignModal(false); setSelectedAgent('') }}
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkAssign}
+                disabled={actionLoading}
+                className="flex-1 px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50"
+              >
+                {actionLoading ? 'Assigning...' : `Assign ${selectedLeads.length} leads`}
               </button>
             </div>
           </div>

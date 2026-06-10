@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import API from '../../api/axios'
 import useAuthStore from '../../store/authStore'
+import AttendanceWidget from '../../components/AttendanceWidget'
 
 export default function AgentDashboard() {
   const { user } = useAuthStore()
@@ -86,6 +87,7 @@ export default function AgentDashboard() {
         <p className="text-gray-500 text-sm mt-1">
           Welcome back, {user?.name}! Here are your assigned leads.
         </p>
+        <AttendanceWidget />
       </div>
 
       <div className="grid grid-cols-4 gap-4 mb-6">

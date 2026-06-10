@@ -18,6 +18,21 @@ import TeamLeadLeads from './pages/teamlead/TeamLeadLeads'
 import TeamLeadAgents from './pages/teamlead/TeamLeadAgents'
 import AgentLeads from './pages/agent/AgentLeads'
 import AgentCustomers from './pages/agent/AgentCustomers'
+import HRDashboard from './pages/hr/HRDashboard'
+import Attendance from './pages/hr/Attendance'
+import Leave from './pages/hr/Leave'
+import Payroll from './pages/hr/Payroll'
+import Performance from './pages/hr/Performance'
+import MonthlyAttendance from './pages/hr/MonthlyAttendance'
+import MyLeave from './pages/common/MyLeave'
+import AdminAttendance from './pages/dashboard/AdminAttendance'
+import AdminPayroll from './pages/dashboard/AdminPayroll'
+import AdminPerformance from './pages/dashboard/AdminPerformance'
+import ManagerPerformance from './pages/manager/ManagerPerformance'
+import Profile from './pages/common/Profile'
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -77,6 +92,11 @@ function App() {
     <TeamLeadAgents />
   </ProtectedRoute>
 } />
+<Route path="/profile" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'TEAM_LEAD', 'AGENT', 'HR']}>
+    <Profile />
+  </ProtectedRoute>
+} />
 
 <Route path="/agent/leads" element={
   <ProtectedRoute roles={['AGENT']}>
@@ -113,6 +133,11 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/manager/performance" element={
+  <ProtectedRoute roles={['MANAGER']}>
+    <ManagerPerformance />
+  </ProtectedRoute>
+} />
 <Route
   path="/manager/team"
   element={
@@ -138,15 +163,36 @@ function App() {
     </ProtectedRoute>
   }
 />
-
-        <Route
-          path="/hr"
-          element={
-            <ProtectedRoute roles={['HR']}>
-              <div className="p-8 text-2xl font-semibold">HR Dashboard — Coming Soon</div>
-            </ProtectedRoute>
-          }
-        />
+<Route path="/hr" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN']}>
+    <HRDashboard />
+  </ProtectedRoute>
+} />
+<Route path="/hr/attendance" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN']}>
+    <Attendance />
+  </ProtectedRoute>
+} />
+<Route path="/hr/leave" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN']}>
+    <Leave />
+  </ProtectedRoute>
+} />
+<Route path="/hr/payroll" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN']}>
+    <Payroll />
+  </ProtectedRoute>
+} />
+<Route path="/hr/performance" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN']}>
+    <Performance />
+  </ProtectedRoute>
+} />
+<Route path="/hr/attendance/monthly" element={
+  <ProtectedRoute roles={['HR', 'SUPER_ADMIN', 'ADMIN', 'MANAGER', 'TEAM_LEAD']}>
+    <MonthlyAttendance />
+  </ProtectedRoute>
+} />
         <Route
   path="/dashboard/pending-users"
   element={
@@ -155,6 +201,28 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/my-leave" element={
+  <ProtectedRoute roles={['ADMIN', 'MANAGER', 'TEAM_LEAD', 'AGENT', 'HR']}>
+    <MyLeave />
+  </ProtectedRoute>
+} />
+
+<Route path="/dashboard/attendance" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN']}>
+    <AdminAttendance />
+  </ProtectedRoute>
+} />
+<Route path="/dashboard/payroll" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN']}>
+    <AdminPayroll />
+  </ProtectedRoute>
+} />
+
+<Route path="/dashboard/performance" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN']}>
+    <AdminPerformance />
+  </ProtectedRoute>
+} />
 
       </Routes>
     </BrowserRouter>
