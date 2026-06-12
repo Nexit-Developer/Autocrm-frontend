@@ -30,7 +30,10 @@ import AdminPayroll from './pages/dashboard/AdminPayroll'
 import AdminPerformance from './pages/dashboard/AdminPerformance'
 import ManagerPerformance from './pages/manager/ManagerPerformance'
 import Profile from './pages/common/Profile'
-
+import Announcements from './pages/common/Announcements'
+import Policy from './pages/common/Policy'
+import Chat from './pages/common/Chat'
+import Tasks from './pages/common/Tasks'
 
 
 function App() {
@@ -49,6 +52,22 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/announcements" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'AGENT']}>
+    <Announcements />
+  </ProtectedRoute>
+} />
+<Route path="/chat" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'AGENT']}>
+    <Chat />
+  </ProtectedRoute>
+} />
+
+<Route path="/policy" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'AGENT']}>
+    <Policy />
+  </ProtectedRoute>
+} />
         <Route
   path="/dashboard/users"
   element={
@@ -57,6 +76,11 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/tasks" element={
+  <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'AGENT']}>
+    <Tasks />
+  </ProtectedRoute>
+} />
 <Route
   path="/dashboard/companies"
   element={
