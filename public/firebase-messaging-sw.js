@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js')
 importScripts('https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js')
 
@@ -26,6 +27,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const link = event.notification.data?.link || '/'
   event.waitUntil(
+    // eslint-disable-next-line no-undef
     clients.matchAll({ type: 'window' }).then((clientList) => {
       for (const client of clientList) {
         if (client.url === link && 'focus' in client) {

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const API = axios.create({
-  baseURL: 'http://192.168.100.201:5000/api',
+  baseURL: 'https://autocrm-backend-production.up.railway.app/api',
 })
 
 API.interceptors.request.use((config) => {

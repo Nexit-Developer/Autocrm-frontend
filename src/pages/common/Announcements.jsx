@@ -76,6 +76,7 @@ export default function Announcements() {
     try {
       await API.delete(`/announcements/${id}`)
       await refreshAnnouncements()
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       alert('Failed to delete')
     } finally {

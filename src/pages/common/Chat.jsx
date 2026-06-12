@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect, useRef } from 'react'
 import DashboardLayout from '../../components/Layout/DashboardLayout'
 import API from '../../api/axios'
@@ -30,7 +32,7 @@ export default function Chat() {
 
   useEffect(() => {
     // Connect socket
-    socket = io('http://localhost:5000')
+    socket = io('https://autocrm-backend-production.up.railway.app')
     socket.emit('join', user.id)
 
     // Listen for incoming messages
