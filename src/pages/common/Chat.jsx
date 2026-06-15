@@ -17,6 +17,11 @@ const roleColors = {
 
 let socket = null
 
+// Module-level caches — survive component unmount/remount
+let cachedConversations = null
+let cachedAvailableUsers = null
+const cachedMessages = {}
+
 export default function Chat() {
   const { user } = useAuthStore()
   const [availableUsers, setAvailableUsers] = useState([])
@@ -72,20 +77,30 @@ export default function Chat() {
 
     // Fetch initial data
     const getData = async () => {
-      try {
-        const [usersRes, convsRes] = await Promise.all([
-          API.get('/messages/users/available'),
-          API.get('/messages/conversations'),
-        ])
-        setAvailableUsers(usersRes.data)
-        setConversations(convsRes.data)
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    getData()
+  // Show cached data instantly if available
+  if (cachedAvailableUsers && cachedConversations) {
+    setAvailableUsers(cachedAvailableUsers)
+    setConversations(cachedConversations)
+    setLoading(false)
+  }
+
+  // Refresh in background
+  try {
+    const [usersRes, convsRes] = await Promise.all([
+      API.get('/messages/users/available'),
+      API.get('/messages/conversations'),
+    ])
+    cachedAvailableUsers = usersRes.data
+    cachedConversations = convsRes.data
+    setAvailableUsers(usersRes.data)
+    setConversations(convsRes.data)
+  } catch (err) {
+    console.error(err)
+  } finally {
+    setLoading(false)
+  }
+}
+getData()
 
     return () => {
       if (socket) socket.disconnect()
@@ -101,13 +116,14 @@ export default function Chat() {
   }
 
   const refreshConversations = async () => {
-    try {
-      const res = await API.get('/messages/conversations')
-      setConversations(res.data)
-    } catch (err) {
-      console.error(err)
-    }
+  try {
+    const res = await API.get('/messages/conversations')
+    cachedConversations = res.data
+    setConversations(res.data)
+  } catch (err) {
+    console.error(err)
   }
+}
 
 const messageCache = useRef({})
 
@@ -115,18 +131,18 @@ const handleSelectUser = async (selectedU) => {
   setSelectedUser(selectedU)
   selectedUserRef.current = selectedU
 
-  // Show cached messages instantly if available
-  if (messageCache.current[selectedU.id]) {
-    setMessages(messageCache.current[selectedU.id])
+  // Show cached messages instantly
+  if (cachedMessages[selectedU.id]) {
+    setMessages(cachedMessages[selectedU.id])
     setMessagesLoading(false)
   } else {
     setMessagesLoading(true)
   }
 
+  // Refresh in background
   try {
     const res = await API.get(`/messages/${selectedU.id}`)
-    // Update cache
-    messageCache.current[selectedU.id] = res.data
+    cachedMessages[selectedU.id] = res.data
     setMessages(res.data)
     socket.emit('mark_read', { senderId: selectedU.id, receiverId: user.id })
     await refreshConversations()
