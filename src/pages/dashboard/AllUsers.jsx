@@ -23,6 +23,10 @@ export default function AllUsers() {
   const [editModal, setEditModal] = useState(null)
   const [editForm, setEditForm] = useState({ role: '', companyId: '' })
   const [actionLoading, setActionLoading] = useState(null)
+  const [viewUser, setViewUser] = useState(null)
+  const [viewTab, setViewTab] = useState('profile')
+  const [viewData, setViewData] = useState(null)
+  const [viewLoading, setViewLoading] = useState(false)
 
   useEffect(() => {
     const getData = async () => {
@@ -50,7 +54,21 @@ export default function AllUsers() {
       console.error(err)
     }
   }
-
+const openViewAs = async (user, tab = 'profile') => {
+    setViewUser(user)
+    setViewTab(tab)
+    setViewLoading(true)
+    setViewData(null)
+    try {
+      const res = await API.get(`/view-as/${user.id}/${tab}`)
+      setViewData(res.data)
+    } catch (err) {
+      console.error(err)
+      alert(err.response?.data?.message || 'Failed to load')
+    } finally {
+      setViewLoading(false)
+    }
+  }
   const handleEdit = (user) => {
     setEditModal(user)
     setEditForm({
@@ -205,6 +223,12 @@ export default function AllUsers() {
                         }`}
                       >
                         {user.isActive ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => openViewAs(user)}
+                        className="bg-gray-50 text-gray-600 border border-gray-200 text-xs px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        View
                       </button>
                     </div>
                   </td>
