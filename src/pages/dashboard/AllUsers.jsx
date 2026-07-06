@@ -296,6 +296,64 @@ const openViewAs = async (user, tab = 'profile') => {
           </div>
         </div>
       )}
+
+      {/* Read-only View-As Panel */}
+      {viewUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-amber-50 border-b border-amber-200 px-5 py-2.5 flex items-center gap-2">
+              <span className="text-amber-600">👁️</span>
+              <span className="text-sm text-amber-800 font-medium">
+                Viewing {viewUser.name}'s dashboard — read only
+              </span>
+            </div>
+
+            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-sm font-medium text-purple-700">
+                  {viewUser.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">{viewUser.name}</div>
+                  <div className="text-xs text-gray-400">{viewUser.role.replace('_', ' ')}</div>
+                </div>
+              </div>
+              <button
+                onClick={() => { setViewUser(null); setViewData(null) }}
+                className="text-gray-400 hover:text-gray-600 text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-5 pt-3 flex gap-2 border-b border-gray-200 overflow-x-auto">
+              {['profile', 'leads', 'tasks', 'attendance', 'leaves', 'conversations'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => openViewAs(viewUser, tab)}
+                  className={`text-sm px-3 py-2 border-b-2 transition-colors whitespace-nowrap ${
+                    viewTab === tab
+                      ? 'border-purple-600 text-purple-600 font-medium'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab === 'conversations' ? 'Chats' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-5 overflow-y-auto flex-1">
+              {viewLoading ? (
+                <div className="text-center py-12 text-gray-400">Loading...</div>
+              ) : (
+                <pre className="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                  {JSON.stringify(viewData, null, 2)}
+                </pre>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }
