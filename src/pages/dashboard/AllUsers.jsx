@@ -458,8 +458,110 @@ const openViewAs = async (user, tab = 'profile') => {
                     ))}
                   </div>
                 )
+             ) : viewTab === 'profile' ? (
+                !viewData ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">No data</div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-lg font-semibold text-purple-700">
+                        {viewData.name?.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-base font-semibold text-gray-900">{viewData.name}</div>
+                        <div className="text-sm text-gray-500">{viewData.email}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      {[
+                        ['Role', viewData.role?.replace('_', ' ')],
+                        ['Company', viewData.company?.name || '—'],
+                        ['Phone', viewData.phone || '—'],
+                        ['Status', viewData.isActive ? 'Active' : 'Inactive'],
+                        ['Joined', viewData.createdAt ? new Date(viewData.createdAt).toLocaleDateString() : '—'],
+                      ].map(([label, val]) => (
+                        <div key={label} className="border border-gray-100 rounded-lg px-3 py-2">
+                          <div className="text-xs text-gray-400">{label}</div>
+                          <div className="text-sm text-gray-800">{val}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ) : viewTab === 'leads' ? (
+                (!viewData || viewData.length === 0) ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">No leads</div>
+                ) : (
+                  <div className="space-y-2">
+                    {viewData.map((l) => (
+                      <div key={l.id} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-gray-900 truncate">{l.name}</div>
+                          <div className="text-xs text-gray-400">{l.phone} · {l.city || '—'}</div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {l.assignedTo?.name && (
+                            <span className="text-xs text-gray-400">{l.assignedTo.name}</span>
+                          )}
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                            {l.status?.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : viewTab === 'tasks' ? (
+                (!viewData || viewData.length === 0) ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">No tasks</div>
+                ) : (
+                  <div className="space-y-2">
+                    {viewData.map((t) => (
+                      <div key={t.id} className="px-3 py-2 rounded-lg border border-gray-100">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-900">{t.title}</span>
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            t.status === 'APPROVED' ? 'bg-purple-100 text-purple-700' :
+                            t.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
+                            t.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {t.status?.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          {t.priority} · from {t.createdBy?.name || '—'}
+                          {t.dueDate ? ` · due ${new Date(t.dueDate).toLocaleDateString()}` : ''}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : viewTab === 'leaves' ? (
+                (!viewData || viewData.length === 0) ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">No leave records</div>
+                ) : (
+                  <div className="space-y-2">
+                    {viewData.map((lv) => (
+                      <div key={lv.id} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100">
+                        <div>
+                          <div className="text-sm text-gray-800">{lv.type}</div>
+                          <div className="text-xs text-gray-400">
+                            {new Date(lv.startDate).toLocaleDateString()} → {new Date(lv.endDate).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          lv.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                          lv.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                          'bg-amber-100 text-amber-700'
+                        }`}>
+                          {lv.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
-                // ---- Everything else: readable JSON fallback ----
                 <pre className="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4 overflow-x-auto">
                   {JSON.stringify(viewData, null, 2)}
                 </pre>
