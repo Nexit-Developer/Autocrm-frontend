@@ -27,6 +27,9 @@ export default function AllUsers() {
   const [viewTab, setViewTab] = useState('profile')
   const [viewData, setViewData] = useState(null)
   const [viewLoading, setViewLoading] = useState(false)
+  const [viewChatWith, setViewChatWith] = useState(null)
+  const [viewChatMessages, setViewChatMessages] = useState([])
+  const [viewChatLoading, setViewChatLoading] = useState(false)
 
   useEffect(() => {
     const getData = async () => {
@@ -59,6 +62,7 @@ const openViewAs = async (user, tab = 'profile') => {
     setViewTab(tab)
     setViewLoading(true)
     setViewData(null)
+    setViewChatWith(null)
     try {
       const res = await API.get(`/view-as/${user.id}/${tab}`)
       setViewData(res.data)
@@ -75,6 +79,21 @@ const openViewAs = async (user, tab = 'profile') => {
       role: user.role,
       companyId: user.companyId || ''
     })
+  }
+
+  const openViewChat = async (otherUser) => {
+    setViewChatWith(otherUser)
+    setViewChatLoading(true)
+    setViewChatMessages([])
+    try {
+      const res = await API.get(`/view-as/${viewUser.id}/messages/${otherUser.id}`)
+      setViewChatMessages(res.data)
+    } catch (err) {
+      console.error(err)
+      alert(err.response?.data?.message || 'Failed to load messages')
+    } finally {
+      setViewChatLoading(false)
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -345,7 +364,102 @@ const openViewAs = async (user, tab = 'profile') => {
             <div className="p-5 overflow-y-auto flex-1">
               {viewLoading ? (
                 <div className="text-center py-12 text-gray-400">Loading...</div>
+              ) : viewTab === 'conversations' ? (
+                viewChatWith ? (
+                  // ---- Single conversation transcript ----
+                  <div>
+                    <button
+                      onClick={() => setViewChatWith(null)}
+                      className="text-sm text-purple-600 hover:underline mb-3"
+                    >
+                      ← Back to conversations
+                    </button>
+                    <div className="text-sm font-medium text-gray-900 mb-3">
+                      Conversation with {viewChatWith.name}
+                    </div>
+                    {viewChatLoading ? (
+                      <div className="text-center py-8 text-gray-400">Loading...</div>
+                    ) : viewChatMessages.length === 0 ? (
+                      <div className="text-center py-8 text-gray-400 text-sm">No messages</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {viewChatMessages.map((m) => {
+                          const fromTarget = m.senderId === viewUser.id
+                          return (
+                            <div key={m.id} className={`flex ${fromTarget ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-md px-3 py-2 rounded-2xl text-sm ${
+                                fromTarget
+                                  ? 'bg-purple-600 text-white rounded-br-sm'
+                                  : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+                              }`}>
+                                <div>{m.content}</div>
+                                <div className={`text-[10px] mt-1 ${fromTarget ? 'text-purple-200' : 'text-gray-400'}`}>
+                                  {m.sender?.name} · {new Date(m.createdAt).toLocaleString()}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // ---- Conversation list ----
+                  (!viewData || viewData.length === 0) ? (
+                    <div className="text-center py-8 text-gray-400 text-sm">No conversations</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {viewData.map((c) => (
+                        <div
+                          key={c.user.id}
+                          onClick={() => openViewChat(c.user)}
+                          className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 cursor-pointer"
+                        >
+                          <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-sm font-medium text-purple-700">
+                            {c.user.name.charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900">{c.user.name}</div>
+                            <div className="text-xs text-gray-400 truncate">{c.lastMessage?.content}</div>
+                          </div>
+                          <div className="text-xs text-gray-300">
+                            {c.lastMessage && new Date(c.lastMessage.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                )
+              ) : viewTab === 'attendance' ? (
+                // ---- Attendance list ----
+                (!viewData || viewData.length === 0) ? (
+                  <div className="text-center py-8 text-gray-400 text-sm">No attendance this month</div>
+                ) : (
+                  <div className="space-y-1">
+                    {viewData.map((a) => (
+                      <div key={a.id} className="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100 text-sm">
+                        <span className="text-gray-700">
+                          {new Date(a.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          a.status === 'PRESENT' ? 'bg-green-100 text-green-700' :
+                          a.status === 'LATE' ? 'bg-amber-100 text-amber-700' :
+                          a.status === 'HALF_DAY' ? 'bg-blue-100 text-blue-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {a.status?.replace('_', ' ')}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {a.checkIn ? new Date(a.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                          {' → '}
+                          {a.checkOut ? new Date(a.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : (
+                // ---- Everything else: readable JSON fallback ----
                 <pre className="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 rounded-lg p-4 overflow-x-auto">
                   {JSON.stringify(viewData, null, 2)}
                 </pre>
